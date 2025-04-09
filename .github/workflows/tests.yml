@@ -1,0 +1,44 @@
+# Copyright 2012-2025 Stanislav Senotrusov
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Deployment tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Runs every Sunday at 6:00 AM UTC
+    - cron: '0 6 * * 0'
+
+jobs:
+  test-windows-deployment:
+    name: Test Windows deployment script
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+
+    steps:
+      - name: Checkout repository (for context or future use)
+        uses: actions/checkout@v4
+
+      - name: Run deployment script from remote source
+        shell: powershell
+        run: |
+          Write-Output "Downloading and executing deployment script..."
+          iwr -UseBasicParsing -Headers @{ "Cache-Control" = "no-cache" } `
+            "https://raw.githubusercontent.com/senotrusov/windows-box-deployment/main/deploy.ps1" | iex
